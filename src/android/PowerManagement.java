@@ -25,6 +25,7 @@ import org.json.JSONException;
 
 import android.content.Context;
 import android.os.PowerManager;
+import android.view.WindowManager;
 import android.util.Log;
 
 import org.apache.cordova.CordovaWebView;
@@ -60,22 +61,11 @@ public class PowerManagement extends CordovaPlugin {
 		Log.d("PowerManagementPlugin", "Plugin execute called - " + this.toString() );
 		Log.d("PowerManagementPlugin", "Action is " + action );
 		
-		try {
-			if( action.equals("acquire") ) {
-					if( args.length() > 0 && args.getBoolean(0) ) {
-						Log.d("PowerManagementPlugin", "Only dim lock" );
-						result = this.acquire( PowerManager.SCREEN_DIM_WAKE_LOCK );
-					}
-					else {
-						result = this.acquire( PowerManager.FULL_WAKE_LOCK );
-					}
-			}
-			else if( action.equals("release") ) {
-				result = this.release();
-			}
+		if( action.equals("acquire") ) {
+			result = this.acquire();
 		}
-		catch( JSONException e ) {
-			result = new PluginResult(Status.JSON_EXCEPTION, e.getMessage());
+		else if( action.equals("release") ) {
+			result = this.release();
 		}
 		
 		callbackContext.sendPluginResult(result);
@@ -87,11 +77,11 @@ public class PowerManagement extends CordovaPlugin {
 	 * @param p_flags Type of wake-lock to acquire
 	 * @return PluginResult containing the status of the acquire process
 	 */
-	private PluginResult acquire( int p_flags ) {
+	private PluginResult acquire() {
 		PluginResult result = null;
 		
 		if (this.wakeLock == null) {
-			this.wakeLock = this.powerManager.newWakeLock(p_flags, "PowerManagementPlugin");
+			this.wakeLock = this.powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "PowerManagementPlugin");
 			try {
 				this.wakeLock.acquire();
 				result = new PluginResult(PluginResult.Status.OK);
